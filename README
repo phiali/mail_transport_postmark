@@ -1,0 +1,18 @@
+Postmarkapp is a "email delivery in the cloud" service for sending out transactional emails in your applications. By using this service you don't need to worry about the setup and maintenance of a mailserver and as Postmarkapp is built to scale it can easily deal with large bursts of messages. Whilst an easy-to-use API is available this Zend_Mail transport allows you to easily switch out and use Postmark for mail delivery.
+
+Usage is as simple as:
+
+<?php
+    Zend_Mail::setDefaultTransport( new Mail_Transport_Postmark( 'your_api_key' ) );
+ 
+    $mail = new Zend_Mail();
+    $mail->setFrom( 'alistair...', 'Alistair Phillips' );
+    $mail->setReplyTo( 'some-other-address', 'Alistair Phillips' );
+    $mail->addTo( 'new-user-address', 'Joe Smith' );
+    $mail->setSubject( 'Welcome to...' );
+    $mail->setBodyText( 'This is an example of a text body' );
+    $mail->setBodyHtml( 'This is an example of an HTML body with <strong>bold</strong>' );
+    $mail->send();
+?>
+
+One call to setDefaultTransport() and you're now using the cloud for delivery. Do keep in mind that Postmark don't currently allow attachments or Bcc'ing so those are ignored by the class.
