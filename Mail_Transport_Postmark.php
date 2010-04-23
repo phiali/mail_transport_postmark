@@ -6,7 +6,7 @@
  *
  * @author Alistair Phillips (alistair@0gravity.co.uk)
  * @copyright Copyright 2010, Alistair Phillips
- * @version 0.1
+ * @version 0.2
  *
  */
  
@@ -57,6 +57,18 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
             reset($headers['Cc']);
         }
         
+        $bcc = array();
+        if ( array_key_exists( 'Bcc', $headers ) ) {
+            reset($headers['Bcc']);
+            foreach($headers['Bcc'] as $key => $val ) {
+                if( empty($key) || $key != 'append' )
+                {
+                    $bcc[] = $val;
+                }
+            }
+            reset($headers['Bcc']);
+        }
+        
         $from = array();
         if ( array_key_exists( 'From', $headers ) ) {
             reset($headers['From']);
@@ -85,17 +97,22 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
             'From'     => implode( ',', $from ),
             'To'       => implode( ',', $to ),
             'Cc'       => implode( ',', $cc ),
+            'Bcc'      => implode( ',', $bcc),
             'Subject'  => $this->_mail->getSubject(),
             'ReplyTo'  => implode( ',', $replyto ),
         );
         
         // We first check if the relevant content exists (returned as a Zend_Mime_Part)
         if ( $this->_mail->getBodyText() ) {
-            $postData['TextBody'] = $this->_mail->getBodyText()->getContent();
+            $part = $this->_mail->getBodyText();
+            $part->encoding = false;
+            $postData['TextBody'] = $part->getContent();            
         }
         
         if ( $this->_mail->getBodyHtml() ) {
-            $postData['HtmlBody'] = $this->_mail->getBodyHtml()->getContent();
+            $part = $this->_mail->getBodyHtml();
+            $part->encoding = false;
+            $postData['HtmlBody'] = $part->getContent();
         }
         
         require_once 'Zend/Http/Client.php';
