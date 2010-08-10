@@ -92,6 +92,18 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
             }
             reset($headers['Reply-To']);
         }
+	
+	$tags = array();
+        if (array_key_exists('postmark-tag', $headers)) {
+            reset($headers['postmark-tag']);
+            foreach ($headers['postmark-tag'] as $key => $val) {
+                if (empty($key) || $key != 'append') {
+
+                    $tags[] = $val;
+                }
+            }
+            reset($headers['postmark-tag']);
+        }
         
         $postData = array(
             'From'     => implode( ',', $from ),
@@ -100,6 +112,7 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
             'Bcc'      => implode( ',', $bcc),
             'Subject'  => $this->_mail->getSubject(),
             'ReplyTo'  => implode( ',', $replyto ),
+            'tag' => implode(',', $tags)
         );
         
         // We first check if the relevant content exists (returned as a Zend_Mime_Part)
