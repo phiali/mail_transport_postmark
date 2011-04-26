@@ -15,4 +15,4 @@ Usage is as simple as:
     $mail->send();
 ?>
 
-One call to setDefaultTransport() and you're now using the cloud for delivery. Do keep in mind that Postmark don't currently allow attachments which this class will ignore.
+One call to setDefaultTransport() and you're now using the cloud for delivery. Added support for attachments to the class.
