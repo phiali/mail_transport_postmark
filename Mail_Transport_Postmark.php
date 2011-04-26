@@ -127,7 +127,20 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
             $part->encoding = false;
             $postData['HtmlBody'] = $part->getContent();
         }
-        
+        if($this->_mail->hasAttachments){
+            $attachments = array();
+            $parts = $this->_mail->getParts();
+            if(is_array($parts)){
+                $i = 0;
+                foreach($parts as $part){
+                    $attachments[$i]['ContentType'] = $part->type;
+                    $attachments[$i]['Name'] = $part->filename;
+                    $attachments[$i]['Content'] = $part->getContent();
+                    $i++;
+                }
+            }
+            $postData['Attachments'] = $attachments;
+        }
         require_once 'Zend/Http/Client.php';
         $client = new Zend_Http_Client();
         $client->setUri( 'http://api.postmarkapp.com/email' );
