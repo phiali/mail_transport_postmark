@@ -6,7 +6,7 @@
  *
  * @author Alistair Phillips (alistair@0gravity.co.uk)
  * @copyright Copyright 2010, Alistair Phillips
- * @version 0.2
+ * @version 0.3
  *
  */
  
@@ -19,13 +19,14 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
      */
     private $_apiKey = '';
     
-    public function __construct( $apiKey = '' )
+    public function __construct($apiKey = '')
     {
-        if ( empty( $apiKey ) ) {
+        if (empty($apiKey)) {
             throw new Exception( __CLASS__ . ' must be instantiated with a API key' );
         }
         
         $this->_apiKey = $apiKey;
+        require_once('Zend/Mime/Decode.php');
     }
     
     public function _sendMail()
@@ -34,10 +35,10 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
         $headers = $this->_mail->getHeaders();
         
         $to = array();
-        if ( array_key_exists( 'To', $headers ) ) {
+        if (array_key_exists('To', $headers)) {
             reset($headers['To']);
-            foreach($headers['To'] as $key => $val ) {
-                if( empty($key) || $key != 'append' )
+            foreach($headers['To'] as $key => $val) {
+                if(empty($key) || $key != 'append')
                 {
                     $to[] = $val;
                 }
@@ -46,10 +47,10 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
         }
         
         $cc = array();
-        if ( array_key_exists( 'Cc', $headers ) ) {
+        if (array_key_exists('Cc', $headers)) {
             reset($headers['Cc']);
-            foreach($headers['Cc'] as $key => $val ) {
-                if( empty($key) || $key != 'append' )
+            foreach($headers['Cc'] as $key => $val) {
+                if(empty($key) || $key != 'append')
                 {
                     $cc[] = $val;
                 }
@@ -58,10 +59,10 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
         }
         
         $bcc = array();
-        if ( array_key_exists( 'Bcc', $headers ) ) {
+        if (array_key_exists('Bcc', $headers)) {
             reset($headers['Bcc']);
             foreach($headers['Bcc'] as $key => $val ) {
-                if( empty($key) || $key != 'append' )
+                if(empty($key) || $key != 'append')
                 {
                     $bcc[] = $val;
                 }
@@ -70,10 +71,10 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
         }
         
         $from = array();
-        if ( array_key_exists( 'From', $headers ) ) {
+        if (array_key_exists('From', $headers)) {
             reset($headers['From']);
-            foreach($headers['From'] as $key => $val ) {
-                if( empty($key) || $key != 'append' )
+            foreach($headers['From'] as $key => $val) {
+                if(empty($key) || $key != 'append')
                 {
                     $from[] = $val;
                 }
@@ -82,10 +83,10 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
         }
         
         $replyto = array();
-        if ( array_key_exists( 'Reply-To', $headers ) ) {
+        if (array_key_exists('Reply-To', $headers)) {
             reset($headers['Reply-To']);
-            foreach($headers['Reply-To'] as $key => $val ) {
-                if( empty($key) || $key != 'append' )
+            foreach($headers['Reply-To'] as $key => $val) {
+                if(empty($key) || $key != 'append')
                 {
                     $replyto[] = $val;
                 }
@@ -110,23 +111,24 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
             'To'       => implode( ',', $to ),
             'Cc'       => implode( ',', $cc ),
             'Bcc'      => implode( ',', $bcc),
-            'Subject'  => $this->_mail->getSubject(),
+            'Subject'  => Zend_Mime_Decode::decodeQuotedPrintable($this->_mail->getSubject()),
             'ReplyTo'  => implode( ',', $replyto ),
             'tag'      => implode(',', $tags)
         );
         
         // We first check if the relevant content exists (returned as a Zend_Mime_Part)
-        if ( $this->_mail->getBodyText() ) {
+        if ($this->_mail->getBodyText()) {
             $part = $this->_mail->getBodyText();
             $part->encoding = false;
             $postData['TextBody'] = $part->getContent();            
         }
         
-        if ( $this->_mail->getBodyHtml() ) {
+        if ($this->_mail->getBodyHtml()) {
             $part = $this->_mail->getBodyHtml();
             $part->encoding = false;
             $postData['HtmlBody'] = $part->getContent();
         }
+        
         if($this->_mail->hasAttachments){
             $attachments = array();
             $parts = $this->_mail->getParts();
@@ -134,13 +136,14 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
                 $i = 0;
                 foreach($parts as $part){
                     $attachments[$i]['ContentType'] = $part->type;
-                    $attachments[$i]['Name'] = $part->filename;
-                    $attachments[$i]['Content'] = $part->getContent();
+                    $attachments[$i]['Name']        = $part->filename;
+                    $attachments[$i]['Content']     = $part->getContent();
                     $i++;
                 }
             }
             $postData['Attachments'] = $attachments;
         }
+        
         require_once 'Zend/Http/Client.php';
         $client = new Zend_Http_Client();
         $client->setUri( 'http://api.postmarkapp.com/email' );
@@ -149,11 +152,12 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
             'Accept' => 'application/json',
             'X-Postmark-Server-Token' => $this->_apiKey
         ));
-        $client->setRawData( json_encode( $postData ), 'application/json' );
+
+        $client->setRawData(json_encode($postData), 'application/json');
         $response = $client->request();
         
-        if ( $response->getStatus() != 200 ) {
-            throw new Exception( 'Mail not sent - Postmark returned ' . $response->getStatus() . ' - ' . $response->getMessage() );
+        if ($response->getStatus() != 200) {
+            throw new Exception('Mail not sent - Postmark returned ' . $response->getStatus() . ' - ' . $response->getMessage());
         }
     }
 }
