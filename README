@@ -20,8 +20,11 @@ One call to setDefaultTransport() and you're now using the cloud for delivery. A
 Alternatively, you can use our application resource.
 In your application/config/application.ini, add these lines:
 
+		; This makes sure that your Zend Framework application can find the correct
+		; resource file. Make sure, the Postmark folder is within your library folder.
     pluginPaths.Postmark_Application_Resource = "Postmark/Application/Resource"
 
-		resources.postmark.apikey = "your_api_key"
+		; This initializes the Postmark drop-in replacement.
+    resources.postmark.apikey = "your_api_key"
 
 Now you're good to go and don't have to manually do anything else.
