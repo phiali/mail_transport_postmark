@@ -16,3 +16,12 @@ Usage is as simple as:
 ?>
 
 One call to setDefaultTransport() and you're now using the cloud for delivery. Added support for attachments to the class.
+
+Alternatively, you can use our application resource.
+In your application/config/application.ini, add these lines:
+
+    pluginPaths.Postmark_Application_Resource = "Postmark/Application/Resource"
+
+		resources.postmark.apikey = "your_api_key"
+
+Now you're good to go and don't have to manually do anything else.
