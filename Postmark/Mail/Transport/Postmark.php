@@ -10,7 +10,7 @@
  *
  */
  
-class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
+class Postmark_Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
 {
     /**
      * API key required by Postmark
