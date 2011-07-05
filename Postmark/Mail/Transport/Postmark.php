@@ -10,7 +10,7 @@
  *
  */
  
-class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
+class Postmark_Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
 {
     /**
      * API key required by Postmark
@@ -111,7 +111,7 @@ class Mail_Transport_Postmark extends Zend_Mail_Transport_Abstract
             'To'       => implode( ',', $to ),
             'Cc'       => implode( ',', $cc ),
             'Bcc'      => implode( ',', $bcc),
-            'Subject'  => Zend_Mime_Decode::decodeQuotedPrintable($this->_mail->getSubject()),
+            'Subject'  => imap_utf8($this->_mail->getSubject()),
             'ReplyTo'  => implode( ',', $replyto ),
             'tag'      => implode(',', $tags)
         );
